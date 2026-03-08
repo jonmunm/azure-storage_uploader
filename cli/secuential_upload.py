@@ -11,12 +11,12 @@ from datetime import datetime, timezone
 from azure.identity.aio import DefaultAzureCredential
 from azure.storage.blob.aio import BlobServiceClient
 from datetime import datetime
-from os.path import join, dirname
+from pathlib import Path
 from dotenv import load_dotenv
 from azure.monitor.ingestion.aio import LogsIngestionClient
 
-ROOT_DIR = f'{os.path.dirname(os.path.abspath(__file__))}/../'
-dotenv_path = join(dirname(__file__), f'{ROOT_DIR}/env.env')
+BASE_DIR = Path(__file__).resolve().parent.parent
+dotenv_path = f'{BASE_DIR}/env.env'
 load_dotenv(dotenv_path)
 
 STORAGE_ACCOUNT_NAME = os.environ.get("STORAGE_ACCOUNT_NAME")
@@ -99,7 +99,7 @@ async def command(container, samples, run_name):
 
     print(f"Using Azure Custom Logs: {USE_AZURE_LOGS}")
     print(f"Reading from {EXCEL_BASE_PATH}...")
-    df_base = pandas.read_excel(f'{ROOT_DIR}/{EXCEL_BASE_PATH}')
+    df_base = pandas.read_excel(f'{BASE_DIR}/{EXCEL_BASE_PATH}')
     skipped = df_base.loc[df_base['skip'],:].shape[0]
     print(f"Skipped {skipped} rows ...")
 
@@ -135,7 +135,7 @@ async def command(container, samples, run_name):
 
     run_full_name = f"{run_name}_SEQ_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
     run_df = pandas.DataFrame(results)
-    run_df.to_excel(f'{ROOT_DIR}/{RUNS_BASE_PATH}/{run_full_name}.xlsx')
+    run_df.to_excel(f'{BASE_DIR}/{RUNS_BASE_PATH}/{run_full_name}.xlsx')
     
     await credential.close()
     print(f"Sequential uploading finished | {run_df['size'].sum():.2f} MB | {run_df['rows'].sum():,} rows")

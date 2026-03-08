@@ -9,6 +9,7 @@ def main():
     subparsers = parser.add_subparsers(dest="command", help="Availables commands")
 
     parser_clean = subparsers.add_parser('clean', help="Local resources cleaning")
+    parser_clean.add_argument('--container', required=True, type=str, help="Container")
 
     parser_upload = subparsers.add_parser('parallel-upload', help="Upload files to the cloud")
     parser_upload.add_argument('--container', required=True, type=str, help="Container")
@@ -23,7 +24,7 @@ def main():
     args = parser.parse_args()
 
     if args.command == 'clean':
-        asyncio.run(clean())
+        asyncio.run(clean(container=args.container))
     
     elif args.command == 'parallel-upload':
         asyncio.run(parallel_upload(
@@ -31,7 +32,7 @@ def main():
             samples=args.samples, 
             run_name=args.run_name
         ))
-    elif args.command == 'secuencial-upload':
+    elif args.command == 'secuential-upload':
         asyncio.run(secuential_upload(
             container=args.container, 
             samples=args.samples, 
