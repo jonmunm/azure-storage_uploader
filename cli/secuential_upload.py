@@ -73,7 +73,13 @@ async def upload_worker(row, container_client, ingestion_client):
     file_size = round(len(content) / 1024 / 1024, 2)
         
     blob_client = container_client.get_blob_client(blob_name)
-    await blob_client.upload_blob(content, overwrite=True)
+    await blob_client.upload_blob(
+        content, 
+        overwrite=True,
+        max_concurrency=8,
+        length=len(content),          
+        validate_content=True,
+    )
         
     end_time = time.perf_counter()
     duration = end_time - start_time
@@ -110,7 +116,10 @@ async def command(container, samples, run_name):
     credential = DefaultAzureCredential()
     account_url = f"https://{STORAGE_ACCOUNT_NAME}.blob.core.windows.net"
 
-    blob_service_client = BlobServiceClient(account_url, credential=credential)
+    blob_service_client = BlobServiceClient(
+        account_url, 
+        credential=credential
+    )
     ingestion_client = None
     
     if USE_AZURE_LOGS:
